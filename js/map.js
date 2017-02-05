@@ -6,6 +6,12 @@ var CLIENT_SECRET = "TQLE1DOWEYXCOIQIR4M0O1OJBOTILJSMQB3Y23FSIOVWYF4T";
 var map, infoWindow, infoContent;
 var amsterdamCenterlat = 52.370216;
 var amsterdamCenterlng = 4.895168;
+// Weather information variables
+var units = 'metric';
+var temp;
+var country = 'NL';
+var weatherCity = "amsterdam"
+// Meusum locations variables
 var cityCenter;
 var locations = [
   {title: 'Museum of Bags and Purses', location: { lat: 52.365270, lng: 4.896824 }, foursquareID: '4a270703f964a520ae8c1fe3'},
@@ -76,13 +82,41 @@ var MyViewModel = function () {
         self.museumList.push(new MuseumConstruct(museumItem));
     });
 
+    // getWeatherData is used as helper function to pull weather informaiton from openweathermap.org via ajax api call.
+    // getWeatherData need to be called outside the foreach loop as the weather info should be requested only once.
+    getWeatherData(weatherCity);
+
     // for each Item in the museum list, fetch the museum data from Foursquare and store the info in the object constructor
     // also for every museum in the list create map marker.
     self.museumList().forEach(function (museumItem) {
       // getMuseumData use foursquare api to collect data about the meuseum in the location lists above.
       getMuseumData(museumItem);
-      // setMapMarker is used as helper function to create the map markers.
-      setMapMarker(museumItem);
+
+      // Create Map markers
+      var title = museumItem.title();
+      var marker = new google.maps.Marker({
+        map: map,
+        position: new google.maps.LatLng(museumItem.lat(), museumItem.lng()),
+        title: title,
+        animation: google.maps.Animation.DROP
+      });
+
+      museumItem.marker = marker;
+      
+      // Create an onclick event to open an infowindow at each marker.
+      google.maps.event.addListener(museumItem.marker, 'click', function () {
+          self.hideWeather(); 
+          infoWindow.open(map, this);
+          // google map marker Bounce animation
+          marker.setAnimation(google.maps.Animation.BOUNCE);
+          map.setZoom(13);
+          map.setCenter(marker.position);
+          setTimeout(function () {
+              marker.setAnimation(null);
+          }, 500);
+          //Build the infowindow content
+          infoWindow.setContent(museumItem.infoWindowContent());
+      });
     });
 
     // centerMap function is used to return to the center of the city when clicking the center map Icon on the right top side of the canvas.
@@ -91,6 +125,28 @@ var MyViewModel = function () {
       cityCenter = new google.maps.LatLng(amsterdamCenterlat, amsterdamCenterlng);
       map.panTo(cityCenter);
       map.setZoom(13);
+    }
+
+
+    // toggleWeather function is a helper function to toggle the weather card visiblity when used click show weather button.
+    self.toggleWeather = function() {
+      var weatherDiv = document.getElementById("weather-card");
+      if (weatherDiv.style.visibility == "visible"){
+        self.hideWeather();
+      } 
+      else {
+        self.showWeather();
+      }
+    }
+    // showWeather function is helper function to show the weather card,
+    self.showWeather = function() {
+      document.getElementById("weather-card").style.visibility = "visible"; 
+      self.centerMap();
+    }
+
+    // hideWeather function is helper function to hide the weather card if user open infowindow or clicked on the map.
+    self.hideWeather = function() {
+      document.getElementById("weather-card").style.visibility = "hidden";
     }
 
     // go to marker is function used to activate the muesum marker when the Muesum  item clicked on the left side pane.
@@ -130,75 +186,73 @@ var MyViewModel = function () {
         self.visibleMuseums().forEach(function (museum) {
             museum.marker.setVisible(true);
         });
+        self.hideWeather();
     };
 
     // add map listener to center the map if the user closed the info window.
     google.maps.event.addListener(infoWindow,'closeclick',function(){
+        self.hideWeather();
         self.centerMap();
+        self.hideWeather();
     });
 
     // add map listener to close the infowindow and center the map if the user click on the map while the infowindow is open
     google.maps.event.addListener(map, "click", function(event) {
         infoWindow.close();
         self.centerMap();
+        self.hideWeather();
     });
-};
-
-// this function is used as helper function to create the map markers
-function setMapMarker(museumItem){
-  
-  var title = museumItem.title();
-  var marker = new google.maps.Marker({
-    map: map,
-    position: new google.maps.LatLng(museumItem.lat(), museumItem.lng()),
-    title: title,
-    animation: google.maps.Animation.DROP
-  });
-
-  museumItem.marker = marker;
-  // Create an onclick event to open an infowindow at each marker.
-  google.maps.event.addListener(marker, 'click', function () {
-    infoWindow.open(map, this);
-    // google map marker Bounce animation
-    marker.setAnimation(google.maps.Animation.BOUNCE);
-    map.setZoom(14);
-    map.setCenter(marker.position);
-    setTimeout(function () {
-        marker.setAnimation(null);
-    }, 500);
-    //set the infowindow content
-    infoWindow.setContent(museumItem.infoWindowContent());
-  });
 
 
-  // Make the info Window stylish :)
-  //credit http://en.marnoto.com/2014/09/5-formas-de-personalizar-infowindow.html
-  google.maps.event.addListener(infoWindow, 'domready', function() {
-    // Reference to the DIV that wraps the bottom of infowindow
-    var iwOuter = $('.gm-style-iw');
-    /* Since this div is in a position prior to .gm-div style-iw.
-     * We use jQuery and create a iwBackground variable,
-     * and took advantage of the existing reference .gm-style-iw for the previous div with .prev().
-    */
-    var iwBackground = iwOuter.prev();
-    // Removes background shadow DIV
-    iwBackground.children(':nth-child(2)').css({'display' : 'none'});
-    // Removes white background DIV
-    iwBackground.children(':nth-child(4)').css({'display' : 'none'});
-    // Moves the shadow of the arrow 76px to the left margin.
-    iwBackground.children(':nth-child(1)').attr('style', function(i,s){ return s + 'left: 76px !important;'});
-    // Moves the arrow 76px to the left margin.
-    iwBackground.children(':nth-child(3)').attr('style', function(i,s){ return s + 'left: 76px !important;'});
-    // Changes the desired tail shadow color.
-    iwBackground.children(':nth-child(3)').find('div').children().css({'box-shadow': 'rgba(72, 181, 233, 0.6) 0px 1px 6px', 'z-index' : '1'});
-    // Reference to the div that groups the close button elements.
-    var iwCloseBtn = iwOuter.next();
-    // Apply the desired effect to the close button
-    iwCloseBtn.css({opacity: '1', right: '38px', top: '3px', border: '7px solid #48b5e9', 'border-radius': '13px', 'box-shadow': '0 0 5px #3990B9'});
-  });
+    // Make the info Window stylish :)
+    //credit http://en.marnoto.com/2014/09/5-formas-de-personalizar-infowindow.html
+    google.maps.event.addListener(infoWindow, 'domready', function() {
+      // Reference to the DIV that wraps the bottom of infowindow
+      var iwOuter = $('.gm-style-iw');
+      /* Since this div is in a position prior to .gm-div style-iw.
+       * We use jQuery and create a iwBackground variable,
+       * and took advantage of the existing reference .gm-style-iw for the previous div with .prev().
+      */
+      var iwBackground = iwOuter.prev();
+      // Removes background shadow DIV
+      iwBackground.children(':nth-child(2)').css({'display' : 'none'});
+      // Removes white background DIV
+      iwBackground.children(':nth-child(4)').css({'display' : 'none'});
+      // Moves the shadow of the arrow 76px to the left margin.
+      iwBackground.children(':nth-child(1)').attr('style', function(i,s){ return s + 'left: 76px !important;'});
+      // Moves the arrow 76px to the left margin.
+      iwBackground.children(':nth-child(3)').attr('style', function(i,s){ return s + 'left: 76px !important;'});
+      // Changes the desired tail shadow color.
+      iwBackground.children(':nth-child(3)').find('div').children().css({'box-shadow': 'rgba(72, 181, 233, 0.6) 0px 1px 6px', 'z-index' : '1'});
+      // Reference to the div that groups the close button elements.
+      var iwCloseBtn = iwOuter.next();
+      // Apply the desired effect to the close button
+      iwCloseBtn.css({opacity: '1', right: '38px', top: '3px', border: '7px solid #48b5e9', 'border-radius': '13px', 'box-shadow': '0 0 5px #3990B9'});
+    });
+
 
 };
 
+
+// Get Weather info
+
+function getWeatherData(city) {
+    $.ajax({
+        url: 'http://api.openweathermap.org/data/2.5/weather?q=' + city + '&units='+units+'&appid=8ecbea4d668deb8baf07e07dd0667890',
+        dataType: "json",
+        success: function (data) {
+          $("#city-country").html(data.name+', '+data.sys.country);
+          temp = data.main.temp;
+          $("#temp").html(data.main.temp+" &deg;C"); 
+          $("#weather-description").html(data.weather[0].description);
+          $("#weather-main").html(data.weather[0].main);
+          $(".icon").html('<img src="http://openweathermap.org/img/w/'+data.weather[0].icon+'.png" height="60px" width="60px">');
+        },
+        error: function (e){
+
+        }
+    });
+}
 
 // Get data about the Museum from foursuqre
 function getMuseumData(museumItem){

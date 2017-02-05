@@ -2,6 +2,9 @@
 <html>
   <head>
     <link rel="stylesheet" type="text/css" href="style.css">
+    <link href='http://fonts.googleapis.com/css?family=Lato:400,700' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Raleway:600|Indie+Flower|Pacifico' rel='stylesheet' type='text/css'>
+
     <script type="text/javascript" src="libs/jquery-3.1.1.min.js"></script>
   </head>
   <body>
@@ -17,17 +20,30 @@
       </div>
     </div>
     <div class="container">
-      <div id="mySidenav" class="sidenav" data-bind="click: closeNav">
-        <a href="javascript:void(0)" class="closebtn">&times;</a>
+      <div id="mySidenav" class="sidenav">
+        <a href="javascript:void(0)" class="closebtn" data-bind="click: closeNav">&times;</a>
         <ul id="results-list" data-bind="foreach: visibleMuseums">
-          <li data-bind="click: $parent.goToMarker">
+          <li id="result-item" data-bind="click: $parent.goToMarker">
             <a data-bind="text: title"></a>
           </li>
         </ul>
       </div>
       <div id="map"></div>
       <div title="Re-center map" class="centerBtn" data-bind="click: centerMap">
-        <img src="images/Center-64.png">
+        <img src="images/Center-50.png">
+      </div>
+      <div title="show me the weather" class="weatherBtn" data-bind="click: toggleWeather">
+        <img src="images/Weather-50.png">
+      </div>
+      <div id="weather-card">
+        <div class= "weather">
+          <p id="temp"></p>
+        </div>
+        <div class= "info"> 
+          <div class="icon"></div>
+          <p id="weather-main"></p>
+          <p id="city-country"></p>
+        </div>
       </div>
     </div>
     <script type="text/javascript" src="libs/knockout-3.4.1.js"></script>
