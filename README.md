@@ -17,7 +17,7 @@ The application include the following functionality:
 - Include side bar with the list of Meuseums visable on the map.
 - Include search bar to allow the user filtering the visable muesuems using their names. As soon as user type on the search bar the list get filtered dynamicly.
 - <a href="http://knockoutjs.com">Knockout framework</a> is used to handle the list, filter, and information in the page that subject to state change.
-
+- For mobile users, the left side bar can be hiden, to provide more space for the map canvas.
 
 
 ### You can read the project specification at the following url:
@@ -34,3 +34,12 @@ https://github.com/asmahassan/NeighborhoodMap
 
 - Open the index.html file in your Browser to launch the application.
 
+
+### Application usage instruction:
+- When the map load, you can click on any of the markers on the list to read more information about the specific museum.
+- You can also use the left side bar to get more information about the selected museum.
+- To filter the Museum in the map and the list please use the Seach bar on the top side of the page.
+- To recenter the map, you can click on the "re-center map" icon on the top right of the map canvas.
+- To view the current weather status in Amsterdam city, please click on the weather icon on the top right of the map canvas.
+- For mobile users, you can hide the left side bar by clicking on the "X" icon on top of the side bar.
+- To show the side bar again, you can click on the "Hamburger" Icon on the top left side of the navigation bar.
