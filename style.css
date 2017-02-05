@@ -1,0 +1,201 @@
+/*----- body style -----*/
+html, body {
+  font-family: Arial, sans-serif;
+  height: 100%;
+  margin:  0;
+  padding: 0;
+}
+
+body {
+  font-family: "Lato", sans-serif;
+  height: 100%;
+  width: 100%;
+}
+.container {
+  height: 100%;
+}
+
+/*----- Map canvas style -----*/
+
+#map {  
+  height: 100%;
+  width: 100%;
+  float: right;
+  transition: 0.5s;
+  margin: 0;
+  padding: 0;
+}
+
+/*----- map center Button style -----*/
+
+.centerBtn {
+  color: black;
+  background-color: rgba(255, 255, 255, .9);
+  position: absolute;
+  top: 50px;
+  right: 10px;
+  cursor: pointer;
+  padding: 7px 6px;
+  border: 1px solid gray;
+  width: 30px;
+  height: 30px;
+}
+
+.centerBtn img {
+  width: 30px;
+  height: 30px;
+}
+
+/*----- Nav bar style -----*/
+
+#humburgerIcon span {
+  cursor:pointer;
+  font-size:30px;
+  
+}
+#humburgerIcon {
+  display: inline-block;
+width: 25%; 
+}
+
+#siteTitle {
+  display: inline-block;
+  width: 45%;
+  height: 30px; 
+  padding-top: 5px;
+  text-align: center;
+
+}
+
+#siteTitle span{
+  font-size:30px;
+  text-align: center;
+}
+
+.search-container {
+  width: 25%;
+  text-align: center;
+  float: right;
+}
+
+input[type=text] {
+    width: 100%;
+    box-sizing: border-box;
+    border: 2px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+    background-color: white;
+    background-position: 10px 10px; 
+    background-repeat: no-repeat;
+    padding: 12px 20px 12px 20px;
+    -webkit-transition: width 0.4s ease-in-out;
+    transition: width 0.4s ease-in-out;
+}
+
+
+
+/*---- side Bar style ----*/
+
+.sidenav {
+    height: 100%;
+    width: 25%; 
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    background-color: #111;
+    filter: alpha(opacity=10);
+    overflow-x: hidden;
+    transition: 0.5s;
+    padding-top: 60px;
+}
+.sidenav ul {
+  padding: 0px;
+}
+
+.sidenav a {
+    padding: 8px 8px 8px 32px;
+    text-decoration: none;
+    font-size: 15px;
+    color: #818181;
+    display: block;
+    transition: 0.3s;
+}
+
+
+.sidenav a:hover, .offcanvas a:focus{
+    color: #f1f1f1;
+}
+
+.sidenav .closebtn {
+    position: absolute;
+    top: 0;
+    right: 25px;
+    font-size: 36px;
+    margin-left: 50px;
+}
+
+@media screen and (max-height: 450px) {
+  .sidenav {padding-top: 15px;}
+  .sidenav a {font-size: 18px;}
+}
+
+
+/*----- Info Window custom style -----*/
+
+.gm-style-iw {
+  width: 400px !important;
+  top: 15px !important;
+  left: 0px !important;
+  background-color: #fff;
+  box-shadow: 0 1px 6px rgba(178, 178, 178, 0.6);
+  border: 1px solid rgba(72, 181, 233, 0.6);
+  border-radius: 2px 2px 10px 10px;
+}
+#iw-container {
+  margin-bottom: 10px;
+}
+#iw-container .iw-title {
+  font-family: 'Open Sans Condensed', sans-serif;
+  font-size: 22px;
+  font-weight: 400;
+  padding: 10px;
+  background-color: #48b5e9;
+  color: white;
+  margin: 0;
+  border-radius: 2px 2px 0 0;
+}
+#iw-container .iw-content {
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 400;
+  margin-right: 1px;
+  padding: 15px 5px 20px 15px;
+  max-height: 400px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+.iw-content img {
+  float: right;
+  margin: 0 5px 5px 10px; 
+}
+.iw-subTitle {
+  font-size: 16px;
+  font-weight: 700;
+  padding: 5px 0;
+}
+.iw-bottom-gradient {
+  position: absolute;
+  width: 326px;
+  height: 25px;
+  bottom: 10px;
+  right: 18px;
+  background: linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 100%);
+  background: -webkit-linear-gradient(top, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 100%);
+  background: -moz-linear-gradient(top, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 100%);
+  background: -ms-linear-gradient(top, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 100%);
+}
+
+
+
+
