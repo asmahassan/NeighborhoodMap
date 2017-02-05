@@ -1,9 +1,12 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <link rel="stylesheet" type="text/css" href="style.css">
-    <link href='http://fonts.googleapis.com/css?family=Lato:400,700' rel='stylesheet' type='text/css'>
-    <link href='https://fonts.googleapis.com/css?family=Raleway:600|Indie+Flower|Pacifico' rel='stylesheet' type='text/css'>
+    <meta charset="utf-8">
+    <title>Amsterdam Museums</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="style.css">
+    <link href='http://fonts.googleapis.com/css?family=Lato:400,700' rel='stylesheet'>
+    <link href='https://fonts.googleapis.com/css?family=Raleway:600|Indie+Flower|Pacifico' rel='stylesheet'>
 
     <script type="text/javascript" src="libs/jquery-3.1.1.min.js"></script>
   </head>
@@ -37,18 +40,19 @@
       </div>
       <div id="weather-card">
         <div class= "weather">
-          <p id="temp"></p>
+          <p id="temp" data-bind="text: weatherItem().weatherTemperature"></p>
         </div>
-        <div class= "info"> 
-          <div class="icon"></div>
-          <p id="weather-main"></p>
-          <p id="city-country"></p>
+        <div class= "info" > 
+          <div class="icon"><img data-bind="attr:{src: weatherItem().weatherIconUrl}"></div>
+          <p id="weather-main" data-bind="text: weatherItem().weatherMain"></p>
+          <p id="city-country" data-bind="text: weatherItem().weatherCityCountry"></p>
         </div>
       </div>
     </div>
-    <script type="text/javascript" src="libs/knockout-3.4.1.js"></script>
-    <script type="text/javascript" src="js/map.js"></script>
-    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBye8uiG10xw-pRMuHQBiZ4JvAjG_bfIWk&libraries=geometry&v=3&callback=initMap">
+    <script src="libs/knockout-3.4.1.js"></script>
+    <script src="js/map.js"></script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBye8uiG10xw-pRMuHQBiZ4JvAjG_bfIWk&libraries=geometry&v=3&callback=initMap">
+    onerror="googleError()"
     </script>
   </body>
 </html>

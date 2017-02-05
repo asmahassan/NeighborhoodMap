@@ -3,14 +3,12 @@ var CLIENT_ID = "W1GFTDZFWZMVTYVRP1EV0N4WSUMQ5VBSV1MDXYMB0N5YMWAH";
 var CLIENT_SECRET = "TQLE1DOWEYXCOIQIR4M0O1OJBOTILJSMQB3Y23FSIOVWYF4T";
 
 // Global variables and location array definition.
-var map, infoWindow, infoContent;
+var map, infoWindow;
 var amsterdamCenterlat = 52.370216;
 var amsterdamCenterlng = 4.895168;
 // Weather information variables
 var units = 'metric';
-var temp;
-var country = 'NL';
-var weatherCity = "amsterdam"
+var weatherCity = "amsterdam";
 // Meusum locations variables
 var cityCenter;
 var locations = [
@@ -42,8 +40,22 @@ var MuseumConstruct = function (data) {
     this.canonicalUrl = ko.observable('');
     this.photoPrefix = ko.observable('');
     this.photoSuffix = ko.observable('');
-    this.infoWindowContent = ko.observable('');
+    this.infoWindowContent = ko.observable('<div id="iw-error">' +
+                                            '<div class="iw-error-content">' +
+                                                '<p>Foursquare data is unavailable. Please try again later.</p>' + 
+                                            '</div>' +
+                                          '</div>');
 };
+
+
+var weatherInit = {
+          city: "amsterdam",
+          unit: "metric",
+          weatherTemperature: 'NaN',
+          weatherMain: 'NaN',
+          weatherCityCountry: 'NaN',
+          weatherIconUrl: 'NaN'
+        };
 
 // initalizae google map perameters 
 function initMap() {
@@ -66,6 +78,11 @@ function initMap() {
   ko.applyBindings(new MyViewModel());
 }
 
+//handle google map api errors.
+function googleError() {
+   $("#map").append("<h1>Couldn't load Google Maps, Please Try again later</h1>");
+}
+
 // View Model Start
 var MyViewModel = function () {
     "use strict";
@@ -76,15 +93,26 @@ var MyViewModel = function () {
     self.museumList = ko.observableArray([]);
     self.userInput = ko.observable('');
     self.visibleMuseums = ko.observableArray();
-  
+
+
+    // define weather Item observable
+    self.weatherItem = ko.observable({
+          weatherTemperature: 'NaN',
+          weatherMain: 'NaN',
+          weatherCityCountry: 'NaN',
+          weatherIconUrl: 'NaN'
+      });
+
+
+    // get Weather data.
+    getWeatherData(self.weatherItem);
+    
+
     // Populate the museum list by calling the museum constructor for each item in the locations array
     locations.forEach(function (museumItem) {
         self.museumList.push(new MuseumConstruct(museumItem));
     });
 
-    // getWeatherData is used as helper function to pull weather informaiton from openweathermap.org via ajax api call.
-    // getWeatherData need to be called outside the foreach loop as the weather info should be requested only once.
-    getWeatherData(weatherCity);
 
     // for each Item in the museum list, fetch the museum data from Foursquare and store the info in the object constructor
     // also for every museum in the list create map marker.
@@ -113,7 +141,7 @@ var MyViewModel = function () {
           map.setCenter(marker.position);
           setTimeout(function () {
               marker.setAnimation(null);
-          }, 500);
+          }, 700);
           //Build the infowindow content
           infoWindow.setContent(museumItem.infoWindowContent());
       });
@@ -125,7 +153,7 @@ var MyViewModel = function () {
       cityCenter = new google.maps.LatLng(amsterdamCenterlat, amsterdamCenterlng);
       map.panTo(cityCenter);
       map.setZoom(13);
-    }
+    };
 
 
     // toggleWeather function is a helper function to toggle the weather card visiblity when used click show weather button.
@@ -137,17 +165,17 @@ var MyViewModel = function () {
       else {
         self.showWeather();
       }
-    }
+    };
     // showWeather function is helper function to show the weather card,
     self.showWeather = function() {
       document.getElementById("weather-card").style.visibility = "visible"; 
       self.centerMap();
-    }
+    };
 
     // hideWeather function is helper function to hide the weather card if user open infowindow or clicked on the map.
     self.hideWeather = function() {
       document.getElementById("weather-card").style.visibility = "hidden";
-    }
+    };
 
     // go to marker is function used to activate the muesum marker when the Muesum  item clicked on the left side pane.
     self.goToMarker = function(clickedMuseumItem) {
@@ -158,12 +186,12 @@ var MyViewModel = function () {
     // openNav function is used to toggle the navigation sidebar on.
     self.openNav = function() {
       document.getElementById("mySidenav").style.width = "25%";
-    }
+    };
 
     // openNav function is used to toggle the navigation sidebar off.
     self.closeNav = function() {
       document.getElementById("mySidenav").style.width = "0";
-    }
+    };
 
     // Create list for all the marker that should be visible,
     // in the begining all marker should be visible, and remote the items only if the user enter relevent name in the search bar.
@@ -186,7 +214,9 @@ var MyViewModel = function () {
         self.visibleMuseums().forEach(function (museum) {
             museum.marker.setVisible(true);
         });
+        self.centerMap();
         self.hideWeather();
+
     };
 
     // add map listener to center the map if the user closed the info window.
@@ -219,9 +249,9 @@ var MyViewModel = function () {
       // Removes white background DIV
       iwBackground.children(':nth-child(4)').css({'display' : 'none'});
       // Moves the shadow of the arrow 76px to the left margin.
-      iwBackground.children(':nth-child(1)').attr('style', function(i,s){ return s + 'left: 76px !important;'});
+      iwBackground.children(':nth-child(1)').attr('style', function(i,s){ return s + 'left: 76px !important;';});
       // Moves the arrow 76px to the left margin.
-      iwBackground.children(':nth-child(3)').attr('style', function(i,s){ return s + 'left: 76px !important;'});
+      iwBackground.children(':nth-child(3)').attr('style', function(i,s){ return s + 'left: 76px !important;';});
       // Changes the desired tail shadow color.
       iwBackground.children(':nth-child(3)').find('div').children().css({'box-shadow': 'rgba(72, 181, 233, 0.6) 0px 1px 6px', 'z-index' : '1'});
       // Reference to the div that groups the close button elements.
@@ -234,35 +264,45 @@ var MyViewModel = function () {
 };
 
 
+
 // Get Weather info
+// getWeatherData is used as helper function to pull weather informaiton from openweathermap.org via ajax api call.
 
-function getWeatherData(city) {
+function getWeatherData(weatherItem) {
     $.ajax({
-        url: 'http://api.openweathermap.org/data/2.5/weather?q=' + city + '&units='+units+'&appid=8ecbea4d668deb8baf07e07dd0667890',
+        url: 'http://api.openweathermap.org/data/2.5/weather?q=' + weatherCity + '&units=' + units + '&appid=8ecbea4d668deb8baf07e07dd0667890',
         dataType: "json",
-        success: function (data) {
-          $("#city-country").html(data.name+', '+data.sys.country);
-          temp = data.main.temp;
-          $("#temp").html(data.main.temp+" &deg;C"); 
-          $("#weather-description").html(data.weather[0].description);
-          $("#weather-main").html(data.weather[0].main);
-          $(".icon").html('<img src="http://openweathermap.org/img/w/'+data.weather[0].icon+'.png" height="60px" width="60px">');
-        },
-        error: function (e){
+    })
+    .done(function(data) {  
 
-        }
+          weatherItem({ 
+              weatherTemperature: data.main.temp + " °C",
+              weatherMain: data.weather[0].main,
+              weatherCityCountry: data.name + ', ' + data.sys.country,
+              weatherIconUrl: 'http://openweathermap.org/img/w/'+data.weather[0].icon+'.png'
+            });
+        })
+    .fail(function(error) {
+          weatherItem(
+            {
+              weatherTemperature: 'Error',
+              weatherMain: 'Error',
+              weatherCityCountry: 'Error',
+              weatherIconUrl: 'Error'
+            });
     });
 }
 
 // Get data about the Museum from foursuqre
 function getMuseumData(museumItem){
-    var museumID = museumItem.id()
+    var museumID = museumItem.id();
     // Make AJAX request to Foursquare
     $.ajax({
         url: 'https://api.foursquare.com/v2/venues/' + museumID + 
         '?client_id='+ CLIENT_ID + '&client_secret=' + CLIENT_SECRET + '&v=20130815',
-        dataType: "json",
-        success: function (data) {
+        dataType: "json"
+    })
+    .done(function (data) {
             // Make results easier to handle
             var result = data.response.venue;
             var contact = result.hasOwnProperty('contact') ? result.contact : 'Not available';
@@ -292,13 +332,20 @@ function getMuseumData(museumItem){
 
             museumItem.canonicalUrl(result.canonicalUrl);
             buildInfoWindow(museumItem);
-        },
-        // Alert the user on error. Set messages in the DOM and infowindow
-        error: function (e) {
-            infowindow.setContent('<p>Foursquare data is unavailable. Please try refreshing later.</p>');
         }
-    });
-};
+      )
+    // Alert the user on error. Set messages in the DOM and infowindow
+    .fail(function (e) {
+            museumItem.infoWindowContent('<div id="iw-error">' +
+                                            '<div class="iw-error-content">' +
+                                                '<p>Foursquare data is unavailable. Please try again later.</p>' + 
+                                            '</div>' +
+                                          '</div>');
+      });
+}
+
+
+
 
 // helper funciton to create the infowindow contents..
 function buildInfoWindow(museumItem){
@@ -312,13 +359,13 @@ function buildInfoWindow(museumItem){
                                           '<p><b>Address:</b> ' + museumItem.address() + '</p>' + 
                                           '<p><b>description:</b> ' + museumItem.description() + '</p>' +
                                           '<p><b>Rating:</b> ' + museumItem.rating() + '</p>' +
-                                          '<p><a href=' + museumItem.url() + '>' + museumItem.url() + '</a></p>' +
+                                          '<p><a target="_blank" href=' + museumItem.url() + '>' + museumItem.url() + '</a></p>' +
                                           '<p><a target="_blank" href=' + museumItem.canonicalUrl() + '>Foursquare Page</a></p>' +
                                           '<p><a target="_blank" href=https://www.google.com/maps/dir/Current+Location/' + museumItem.lat() + ',' + museumItem.lng() + '>Directions</a></p>' +
-                                          '<p style="text-align:center;"><a href="https://foursquare.com"><b>Powered by Foursquare</b></a></p>' +
+                                          '<p style="text-align:center;"><a target="_blank" href="https://foursquare.com"><b>Powered by Foursquare</b></a></p>' +
                                       '</div>' +
                                       '<div class="iw-bottom-gradient"></div>' +
                                   '</div>'); 
-};
+}
 
 
