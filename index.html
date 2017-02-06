@@ -7,8 +7,6 @@
     <link rel="stylesheet" href="style.css">
     <link href='http://fonts.googleapis.com/css?family=Lato:400,700' rel='stylesheet'>
     <link href='https://fonts.googleapis.com/css?family=Raleway:600|Indie+Flower|Pacifico' rel='stylesheet'>
-
-    <script type="text/javascript" src="libs/jquery-3.1.1.min.js"></script>
   </head>
   <body>
     <div id="navbar" data-bind="click: openNav">
@@ -38,7 +36,7 @@
       <div title="show me the weather" class="weatherBtn" data-bind="click: toggleWeather">
         <img src="images/Weather-50.png">
       </div>
-      <div id="weather-card">
+      <div id="weather-card" data-bind="visible: isWeatherVisable">
         <div class= "weather">
           <p id="temp" data-bind="text: weatherItem().weatherTemperature"></p>
         </div>
@@ -49,10 +47,10 @@
         </div>
       </div>
     </div>
+    <script type="text/javascript" src="libs/jquery-3.1.1.min.js"></script>
     <script src="libs/knockout-3.4.1.js"></script>
     <script src="js/map.js"></script>
-    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBye8uiG10xw-pRMuHQBiZ4JvAjG_bfIWk&libraries=geometry&v=3&callback=initMap">
-    onerror="googleError()"
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBye8uiG10xw-pRMuHQBiZ4JvAjG_bfIWk&libraries=geometry&v=3&callback=initMap" onerror="googleError()">
     </script>
   </body>
 </html>

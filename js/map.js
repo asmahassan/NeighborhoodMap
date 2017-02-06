@@ -16,7 +16,7 @@ var locations = [
   {title: 'Van Gogh Museum', location: { lat: 52.358416, lng: 4.881076}, foursquareID: '4a2706faf964a5208c8c1fe3'},
   {title: 'Stedelijk Museum', location: { lat: 52.358011, lng: 4.879755 }, foursquareID: '4b5fe77bf964a5203fd029e3'},
   {title: 'EYE Filmmuseum', location: { lat: 52.384328, lng: 4.900809 }, foursquareID: '4de0c8681f6ece647382df30'},
-  {title: 'Het Scheepvaartmuseum', location: { lat: 52.371708, lng: 4.914880}, foursquareID: '4a2706fff964a520a28c1fe3'},
+  {title: 'Het Scheepvaart museum', location: { lat: 52.371708, lng: 4.914880}, foursquareID: '4a2706fff964a520a28c1fe3'},
   {title: 'Het Rembrandthuis', location: { lat: 52.369369, lng: 4.901235}, foursquareID: '4a2706f8f964a520888c1fe3'},
   {title: 'Museum Het Schip', location: { lat: 52.390401, lng: 4.873813}, foursquareID: '4a2706fef964a5209c8c1fe3'},
   {title: 'Amsterdam Pipe Museum', location: { lat: 52.364120, lng: 4.885286}, foursquareID: '509e66e4e4b0b11968f76947'},
@@ -27,35 +27,25 @@ var locations = [
 // Credit https://discussions.udacity.com/t/having-trouble-accessing-data-outside-an-ajax-request/39072/10
 var MuseumConstruct = function (data) {
     "use strict";
-    this.title = ko.observable(data.title);
-    this.lat = ko.observable(data.location.lat);
-    this.lng = ko.observable(data.location.lng);
-    this.id = ko.observable(data.foursquareID);
-    this.marker = ko.observable();
-    this.phone = ko.observable('');
-    this.description = ko.observable('');
-    this.address = ko.observable('');
-    this.rating = ko.observable('');
-    this.url = ko.observable('');
-    this.canonicalUrl = ko.observable('');
-    this.photoPrefix = ko.observable('');
-    this.photoSuffix = ko.observable('');
-    this.infoWindowContent = ko.observable('<div id="iw-error">' +
+    this.title = data.title;
+    this.lat = data.location.lat;
+    this.lng = data.location.lng;
+    this.id = data.foursquareID;
+    this.marker ='' ;
+    this.phone = '';
+    this.description = '';
+    this.address = '';
+    this.rating = '';
+    this.url = '';
+    this.canonicalUrl = '';
+    this.photoPrefix = '';
+    this.photoSuffix = '';
+    this.infoWindowContent = '<div id="iw-error">' +
                                             '<div class="iw-error-content">' +
                                                 '<p>Foursquare data is unavailable. Please try again later.</p>' + 
                                             '</div>' +
-                                          '</div>');
+                                          '</div>';
 };
-
-
-var weatherInit = {
-          city: "amsterdam",
-          unit: "metric",
-          weatherTemperature: 'NaN',
-          weatherMain: 'NaN',
-          weatherCityCountry: 'NaN',
-          weatherIconUrl: 'NaN'
-        };
 
 // initalizae google map perameters 
 function initMap() {
@@ -80,8 +70,14 @@ function initMap() {
 
 //handle google map api errors.
 function googleError() {
-   $("#map").append("<h1>Couldn't load Google Maps, Please Try again later</h1>");
+   $("#map").append('<h1 style="text-align: center; font-size: 20px; top: 40%;' +
+                    'transform: translateY(-50%);  position: relative; color: red;"> '+
+                    'Could not load Google Maps, Please Try again later.' +
+                    '</h1>');
+   $(".sidenav").css({'width':'0'});
+   $("#weather-card").css({'visibility': 'hidden'});
 }
+
 
 // View Model Start
 var MyViewModel = function () {
@@ -93,7 +89,8 @@ var MyViewModel = function () {
     self.museumList = ko.observableArray([]);
     self.userInput = ko.observable('');
     self.visibleMuseums = ko.observableArray();
-
+    // set the weather card visiablity to false
+    self.isWeatherVisable = ko.observable(false);   
 
     // define weather Item observable
     self.weatherItem = ko.observable({
@@ -102,7 +99,6 @@ var MyViewModel = function () {
           weatherCityCountry: 'NaN',
           weatherIconUrl: 'NaN'
       });
-
 
     // get Weather data.
     getWeatherData(self.weatherItem);
@@ -121,10 +117,10 @@ var MyViewModel = function () {
       getMuseumData(museumItem);
 
       // Create Map markers
-      var title = museumItem.title();
+      var title = museumItem.title;
       var marker = new google.maps.Marker({
         map: map,
-        position: new google.maps.LatLng(museumItem.lat(), museumItem.lng()),
+        position: new google.maps.LatLng(museumItem.lat, museumItem.lng),
         title: title,
         animation: google.maps.Animation.DROP
       });
@@ -143,7 +139,7 @@ var MyViewModel = function () {
               marker.setAnimation(null);
           }, 700);
           //Build the infowindow content
-          infoWindow.setContent(museumItem.infoWindowContent());
+          infoWindow.setContent(museumItem.infoWindowContent);
       });
     });
 
@@ -155,26 +151,26 @@ var MyViewModel = function () {
       map.setZoom(13);
     };
 
-
     // toggleWeather function is a helper function to toggle the weather card visiblity when used click show weather button.
     self.toggleWeather = function() {
-      var weatherDiv = document.getElementById("weather-card");
-      if (weatherDiv.style.visibility == "visible"){
-        self.hideWeather();
-      } 
-      else {
+      if ( self.isWeatherVisable() === false ) {
         self.showWeather();
       }
+      else {
+        self.hideWeather();
+      }
     };
+
+
     // showWeather function is helper function to show the weather card,
     self.showWeather = function() {
-      document.getElementById("weather-card").style.visibility = "visible"; 
+      self.isWeatherVisable(true);
       self.centerMap();
     };
 
     // hideWeather function is helper function to hide the weather card if user open infowindow or clicked on the map.
     self.hideWeather = function() {
-      document.getElementById("weather-card").style.visibility = "hidden";
+      self.isWeatherVisable(false);
     };
 
     // go to marker is function used to activate the muesum marker when the Muesum  item clicked on the left side pane.
@@ -185,7 +181,7 @@ var MyViewModel = function () {
 
     // openNav function is used to toggle the navigation sidebar on.
     self.openNav = function() {
-      document.getElementById("mySidenav").style.width = "25%";
+      document.getElementById("mySidenav").style.width = "35%";
     };
 
     // openNav function is used to toggle the navigation sidebar off.
@@ -207,7 +203,7 @@ var MyViewModel = function () {
         self.museumList().forEach(function (museum) {
             museum.marker.setVisible(false);
             // set the place and marker as visible, If user input is included in the name, 
-            if (museum.title().toLowerCase().indexOf(searchInput) !== -1) {
+            if (museum.title.toLowerCase().indexOf(searchInput) !== -1) {
                 self.visibleMuseums.push(museum);
             }
         });
@@ -263,8 +259,6 @@ var MyViewModel = function () {
 
 };
 
-
-
 // Get Weather info
 // getWeatherData is used as helper function to pull weather informaiton from openweathermap.org via ajax api call.
 
@@ -287,7 +281,7 @@ function getWeatherData(weatherItem) {
             {
               weatherTemperature: 'Error',
               weatherMain: 'Error',
-              weatherCityCountry: 'Error',
+              weatherCityCountry: 'Info not available.',
               weatherIconUrl: 'Error'
             });
     });
@@ -295,7 +289,7 @@ function getWeatherData(weatherItem) {
 
 // Get data about the Museum from foursuqre
 function getMuseumData(museumItem){
-    var museumID = museumItem.id();
+    var museumID = museumItem.id;
     // Make AJAX request to Foursquare
     $.ajax({
         url: 'https://api.foursquare.com/v2/venues/' + museumID + 
@@ -307,65 +301,62 @@ function getMuseumData(museumItem){
             var result = data.response.venue;
             var contact = result.hasOwnProperty('contact') ? result.contact : 'Not available';
             if (contact.hasOwnProperty('formattedPhone')) {
-                museumItem.phone(contact.formattedPhone || '');
+                museumItem.phone = contact.formattedPhone || '';
             }
             var location = result.hasOwnProperty('location') ? result.location : 'Not available';
             if (location.hasOwnProperty('address')) {
-                museumItem.address(location.address || '');
+                museumItem.address = location.address || '';
             }
             var bestPhoto = result.hasOwnProperty('bestPhoto') ? result.bestPhoto : '';
             if (bestPhoto.hasOwnProperty('prefix')) {
-                museumItem.photoPrefix(bestPhoto.prefix || '');
+                museumItem.photoPrefix = bestPhoto.prefix || '';
             }
             if (bestPhoto.hasOwnProperty('suffix')) {
-                museumItem.photoSuffix(bestPhoto.suffix || '');
+                museumItem.photoSuffix = bestPhoto.suffix || '';
             }
             var description = result.hasOwnProperty('description') ? result.description : 'This Museum has no description available at the moment.' + 
             ' please check again later';
-            museumItem.description(description || '');
+            museumItem.description = description || '';
 
             var rating = result.hasOwnProperty('rating') ? result.rating : 'Rating not avialable';
-            museumItem.rating(rating || 'none');
+            museumItem.rating = rating || 'none';
 
             var url = result.hasOwnProperty('url') ? result.url : 'URL not available';
-            museumItem.url(url || '');
+            museumItem.url = url || '';
 
-            museumItem.canonicalUrl(result.canonicalUrl);
+            museumItem.canonicalUrl = result.canonicalUrl;
             buildInfoWindow(museumItem);
         }
       )
     // Alert the user on error. Set messages in the DOM and infowindow
     .fail(function (e) {
-            museumItem.infoWindowContent('<div id="iw-error">' +
+            museumItem.infoWindowContent = '<div id="iw-error">' +
                                             '<div class="iw-error-content">' +
                                                 '<p>Foursquare data is unavailable. Please try again later.</p>' + 
                                             '</div>' +
-                                          '</div>');
+                                          '</div>';
       });
 }
 
-
-
-
 // helper funciton to create the infowindow contents..
 function buildInfoWindow(museumItem){
-    museumItem.infoWindowContent('<div id="iw-container">' +
-                                      '<div class="iw-title">' + museumItem.title() + '</div>' +
+    museumItem.infoWindowContent = '<div id="iw-container">' +
+                                      '<div class="iw-title">' + museumItem.title + '</div>' +
                                       '<div class="iw-content">' +
                                           '<div class="iw-subTitle">Museum Information:</div>' +
-                                          '<img src="' + museumItem.photoPrefix() + '200x200' + museumItem.photoSuffix() +
+                                          '<img src="' + museumItem.photoPrefix + '200x200' + museumItem.photoSuffix +
                                           '" alt="Image Location">' + 
-                                          '<p><b>Phone:</b> ' + museumItem.phone() + '</p>' +
-                                          '<p><b>Address:</b> ' + museumItem.address() + '</p>' + 
-                                          '<p><b>description:</b> ' + museumItem.description() + '</p>' +
-                                          '<p><b>Rating:</b> ' + museumItem.rating() + '</p>' +
-                                          '<p><a target="_blank" href=' + museumItem.url() + '>' + museumItem.url() + '</a></p>' +
-                                          '<p><a target="_blank" href=' + museumItem.canonicalUrl() + '>Foursquare Page</a></p>' +
-                                          '<p><a target="_blank" href=https://www.google.com/maps/dir/Current+Location/' + museumItem.lat() + ',' + museumItem.lng() + '>Directions</a></p>' +
+                                          '<p><b>Phone:</b> ' + museumItem.phone + '</p>' +
+                                          '<p><b>Address:</b> ' + museumItem.address + '</p>' + 
+                                          '<p><b>description:</b> ' + museumItem.description + '</p>' +
+                                          '<p><b>Rating:</b> ' + museumItem.rating + '</p>' +
+                                          '<p><a target="_blank" href=' + museumItem.url + '>' + museumItem.url + '</a></p>' +
+                                          '<p><a target="_blank" href=' + museumItem.canonicalUrl + '>Foursquare Page</a></p>' +
+                                          '<p><a target="_blank" href=https://www.google.com/maps/dir/Current+Location/' + museumItem.lat + ',' + museumItem.lng + '>Directions</a></p>' +
                                           '<p style="text-align:center;"><a target="_blank" href="https://foursquare.com"><b>Powered by Foursquare</b></a></p>' +
                                       '</div>' +
                                       '<div class="iw-bottom-gradient"></div>' +
-                                  '</div>'); 
+                                  '</div>'; 
 }
 
 
